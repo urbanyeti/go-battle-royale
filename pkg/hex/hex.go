@@ -1,6 +1,6 @@
 package hex
 
-type Direction int32
+type Direction int
 
 const (
 	E Direction = iota
@@ -25,23 +25,39 @@ func LoadDirections() Directions {
 	return c
 }
 
-func (h HexService) GetNeighbor(c Coordinate, d Direction) Coordinate {
+func (h HexService) GetNeighbor(t *Tile, d Direction) *Tile {
 	dir := h.Directions[d]
-	return Coordinate{Q: c.Q + dir.Q, R: c.R + dir.R}
+	c := t.Coordinate
+	return h.Battlefield[Coordinate{Q: c.Q + dir.Q, R: c.R + dir.R}]
+}
+
+func (h HexService) GetNeighbors(t *Tile) []*Tile {
+	n := []*Tile{}
+	for i := 0; i < len(h.Directions); i++ {
+		n = append(n, h.GetNeighbor(t, Direction(i)))
+	}
+	return n
 }
 
 type HexService struct {
-	Directions Directions
+	Directions  Directions
+	Battlefield Battlefield
 }
 
 func NewHexService() HexService {
-	h := HexService{Directions: LoadDirections()}
+	h := HexService{LoadDirections(), NewBattlefield()}
 	return h
 }
 
 type Coordinate struct {
 	Q int32
 	R int32
+}
+
+type Cube struct {
+	X int32
+	Y int32
+	Z int32
 }
 
 type Tile struct {
