@@ -1,5 +1,44 @@
 package hex
 
+type Direction int32
+
+const (
+	E Direction = iota
+	NE
+	NW
+	W
+	SW
+	SE
+)
+
+type Directions []*Coordinate
+
+func LoadDirections() Directions {
+	c := Directions{
+		{Q: 1, R: 0},
+		{Q: 1, R: -1},
+		{Q: 0, R: -1},
+		{Q: -1, R: 0},
+		{Q: -1, R: 1},
+		{Q: 0, R: 1},
+	}
+	return c
+}
+
+func (h HexService) GetNeighbor(c Coordinate, d Direction) Coordinate {
+	dir := h.Directions[d]
+	return Coordinate{Q: c.Q + dir.Q, R: c.R + dir.R}
+}
+
+type HexService struct {
+	Directions Directions
+}
+
+func NewHexService() HexService {
+	h := HexService{Directions: LoadDirections()}
+	return h
+}
+
 type Coordinate struct {
 	Q int32
 	R int32
@@ -12,7 +51,7 @@ type Tile struct {
 
 type Battlefield map[Coordinate]*Tile
 
-func NewBattlefield() {
+func NewBattlefield() Battlefield {
 	b := Battlefield{}
 	b.addDefaultTile(3, 0)
 	b.addDefaultTile(4, 0)
@@ -51,6 +90,8 @@ func NewBattlefield() {
 	b.addDefaultTile(1, 6)
 	b.addDefaultTile(2, 6)
 	b.addDefaultTile(3, 6)
+
+	return b
 }
 
 func NewTile(q int32, r int32) Tile {
