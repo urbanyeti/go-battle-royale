@@ -17,7 +17,7 @@ type TileFrontier []*TileItem
 func (tf TileFrontier) Len() int { return len(tf) }
 
 func (tf TileFrontier) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
+	// We want Pop to give us the lowest priority
 	return tf[i].priority < tf[j].priority
 }
 
