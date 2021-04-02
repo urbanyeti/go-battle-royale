@@ -6,7 +6,7 @@ import (
 
 func main() {
 	h := hex.NewHexService()
-	hex.FindPath(h, hex.Coordinate{Q: 3, R: 1}, hex.Coordinate{Q: 5, R: 3})
+	hex.FindPath(h, hex.Coordinate{Q: 2, R: 5}, hex.Coordinate{Q: 3, R: 2})
 	// c := hex.Coordinate{Q: 4, R: 1}
 	// t := h.Battlefield[c]
 	// fmt.Println(t)

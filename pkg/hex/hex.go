@@ -81,20 +81,20 @@ func NewBattlefield() Battlefield {
 	b.addDefaultTile(1, 2)
 	b.addDefaultTile(2, 2)
 	b.addDefaultTile(3, 2)
-	b.addDefaultTile(4, 2)
+	b.addBlockingTile(4, 2)
 	b.addDefaultTile(5, 2)
 	b.addDefaultTile(6, 2)
 	b.addDefaultTile(0, 3)
 	b.addDefaultTile(1, 3)
-	b.addDefaultTile(2, 3)
+	b.addBlockingTile(2, 3)
 	b.addDefaultTile(3, 3)
 	b.addDefaultTile(4, 3)
 	b.addDefaultTile(5, 3)
 	b.addDefaultTile(6, 3)
 	b.addDefaultTile(0, 4)
-	b.addDefaultTile(1, 4)
+	b.addBlockingTile(1, 4)
 	b.addDefaultTile(2, 4)
-	b.addDefaultTile(3, 4)
+	b.addBlockingTile(3, 4)
 	b.addDefaultTile(4, 4)
 	b.addDefaultTile(5, 4)
 	b.addDefaultTile(0, 5)
@@ -110,11 +110,12 @@ func NewBattlefield() Battlefield {
 	return b
 }
 
-func NewTile(q int32, r int32) Tile {
-	return Tile{Coordinate: Coordinate{Q: q, R: r}, Cost: 1}
+func (b Battlefield) addDefaultTile(q int32, r int32) {
+	tile := Tile{Coordinate: Coordinate{Q: q, R: r}, Cost: 1}
+	b[Coordinate{Q: q, R: r}] = &tile
 }
 
-func (b Battlefield) addDefaultTile(q int32, r int32) {
-	tile := NewTile(q, r)
+func (b Battlefield) addBlockingTile(q int32, r int32) {
+	tile := Tile{Coordinate: Coordinate{Q: q, R: r}, Cost: 999}
 	b[Coordinate{Q: q, R: r}] = &tile
 }

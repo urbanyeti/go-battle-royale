@@ -18,7 +18,7 @@ func (tf TileFrontier) Len() int { return len(tf) }
 
 func (tf TileFrontier) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return tf[i].priority > tf[j].priority
+	return tf[i].priority < tf[j].priority
 }
 
 func (tf TileFrontier) Swap(i, j int) {
@@ -80,6 +80,10 @@ func Distance(a Coordinate, b Coordinate) int32 {
 	return cubeDistance(axialToCube(a), axialToCube(b))
 }
 
+func TravelCost(a Coordinate, b *Tile) int {
+	return int(Distance(a, b.Coordinate) * b.Cost)
+}
+
 func FindPath(h HexService, start Coordinate, goal Coordinate) {
 	frontier := TileFrontier{}
 	frontier.Push(h.Battlefield[start])
@@ -89,38 +93,37 @@ func FindPath(h HexService, start Coordinate, goal Coordinate) {
 	costSoFar[start] = 0
 
 	for frontier.Len() != 0 {
-		current := frontier.Pop().(*TileItem).Tile
+		current := heap.Pop(&frontier).(*TileItem)
 
 		if current.Coordinate == goal {
 			break
 		}
 
-		for _, next := range h.GetNeighbors(current) {
+		for _, next := range h.GetNeighbors(current.Tile) {
+			if next == nil {
+				continue
+			}
 			newCost := costSoFar[current.Coordinate] + int(next.Cost)
 
 			if val, ok := costSoFar[next.Coordinate]; !ok || newCost < val {
 				costSoFar[next.Coordinate] = newCost
-				priority := newCost + int(Distance(goal, next.Coordinate))
-				frontier.PushPriority(current, priority)
+				priority := newCost + TravelCost(current.Coordinate, next)
+				frontier.PushPriority(next, priority)
 				cameFrom[next.Coordinate] = current.Coordinate
 			}
 		}
 	}
 
-	for i, c := range cameFrom {
-		fmt.Println(i, c)
+	current := goal
+	var path []Coordinate
+	for current != start {
+		path = append(path, current)
+		current = cameFrom[current]
 	}
+	path = append(path, start)
 
-	// current := goal
-	// var path []Coordinate
-	// for current != start {
-	// 	path = append(path, current)
-	// 	current = cameFrom[current]
-	// }
-	// path = append(path, start)
-
-	// for i := len(path) - 1; i >= 0; i-- {
-	// 	fmt.Println(path[i])
-	// }
+	for i := len(path) - 1; i >= 0; i-- {
+		fmt.Println(path[i])
+	}
 
 }
