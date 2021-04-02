@@ -122,8 +122,9 @@ func FindPath(h HexService, start Coordinate, goal Coordinate) {
 	}
 	path = append(path, start)
 
+	fmt.Printf("start: %v goal: %v:\n", start, goal)
 	for i := len(path) - 1; i >= 0; i-- {
 		fmt.Println(path[i])
 	}
-
+	fmt.Println()
 }
