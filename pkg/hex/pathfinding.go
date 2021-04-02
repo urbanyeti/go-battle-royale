@@ -57,7 +57,7 @@ func (tf *TileFrontier) update(item *TileItem, value *Tile, priority int) {
 	heap.Fix(tf, item.index)
 }
 
-func abs(x int32) int32 {
+func abs(x int) int {
 	if x < 0 {
 		return -x
 	}
@@ -72,11 +72,11 @@ func axialToCube(c Coordinate) Cube {
 	return Cube{c.Q, (c.Q * -1) - c.R, c.R}
 }
 
-func cubeDistance(a Cube, b Cube) int32 {
+func cubeDistance(a Cube, b Cube) int {
 	return (abs(a.X-b.Y) + abs(a.Y-b.Y) + abs(a.Z-b.Z)) / 2
 }
 
-func Distance(a Coordinate, b Coordinate) int32 {
+func Distance(a Coordinate, b Coordinate) int {
 	return cubeDistance(axialToCube(a), axialToCube(b))
 }
 

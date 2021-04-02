@@ -1,5 +1,10 @@
 package hex
 
+import (
+	"fmt"
+	"os"
+)
+
 type Direction int
 
 const (
@@ -50,72 +55,103 @@ func NewHexService() HexService {
 }
 
 type Coordinate struct {
-	Q int32
-	R int32
+	Q int
+	R int
 }
 
 type Cube struct {
-	X int32
-	Y int32
-	Z int32
+	X int
+	Y int
+	Z int
 }
 
 type Tile struct {
 	Coordinate Coordinate
-	Cost       int32
+	Cost       int
 }
 
 type Battlefield map[Coordinate]*Tile
 
 func NewBattlefield() Battlefield {
 	b := Battlefield{}
-	b.addDefaultTile(3, 0)
-	b.addDefaultTile(4, 0)
-	b.addDefaultTile(5, 0)
-	b.addDefaultTile(6, 0)
+
+	//Hexagon. Store Hex(q, r) at array[r][q - max(0, N-r)]. Row r size is 2*N+1 - abs(N-r).
+
+	for i := -2; i <= 2; i++ {
+		for j := -2; j < 2; j++ {
+			b.addDefaultTile(i, j)
+		}
+	}
+
+	b.addBlockingTile(0, -1)
+	b.addBlockingTile(1, 1)
 	b.addBlockingTile(2, 1)
-	b.addDefaultTile(3, 1)
-	b.addDefaultTile(4, 1)
-	b.addDefaultTile(5, 1)
-	b.addDefaultTile(6, 1)
-	b.addDefaultTile(1, 2)
-	b.addDefaultTile(2, 2)
-	b.addDefaultTile(3, 2)
-	b.addBlockingTile(4, 2)
-	b.addDefaultTile(5, 2)
-	b.addDefaultTile(6, 2)
-	b.addDefaultTile(0, 3)
-	b.addDefaultTile(1, 3)
-	b.addBlockingTile(2, 3)
-	b.addDefaultTile(3, 3)
-	b.addDefaultTile(4, 3)
-	b.addDefaultTile(5, 3)
-	b.addDefaultTile(6, 3)
-	b.addBlockingTile(0, 4)
-	b.addBlockingTile(1, 4)
-	b.addDefaultTile(2, 4)
-	b.addBlockingTile(3, 4)
-	b.addDefaultTile(4, 4)
-	b.addDefaultTile(5, 4)
-	b.addDefaultTile(0, 5)
-	b.addDefaultTile(1, 5)
-	b.addDefaultTile(2, 5)
-	b.addDefaultTile(3, 5)
-	b.addDefaultTile(4, 5)
-	b.addDefaultTile(0, 6)
-	b.addDefaultTile(1, 6)
-	b.addDefaultTile(2, 6)
-	b.addDefaultTile(3, 6)
+	// b.addDefaultTile(4, 0)
+	// b.addDefaultTile(5, 0)
+	// b.addDefaultTile(6, 0)
+	// b.addBlockingTile(2, 1)
+	// b.addDefaultTile(3, 1)
+	// b.addDefaultTile(4, 1)
+	// b.addDefaultTile(5, 1)
+	// b.addDefaultTile(6, 1)
+	// b.addDefaultTile(1, 2)
+	// b.addDefaultTile(2, 2)
+	// b.addDefaultTile(3, 2)
+	// b.addBlockingTile(4, 2)
+	// b.addDefaultTile(5, 2)
+	// b.addDefaultTile(6, 2)
+	// b.addDefaultTile(0, 3)
+	// b.addDefaultTile(1, 3)
+	// b.addBlockingTile(2, 3)
+	// b.addDefaultTile(3, 3)
+	// b.addDefaultTile(4, 3)
+	// b.addDefaultTile(5, 3)
+	// b.addDefaultTile(6, 3)
+	// b.addBlockingTile(0, 4)
+	// b.addBlockingTile(1, 4)
+	// b.addDefaultTile(2, 4)
+	// b.addBlockingTile(3, 4)
+	// b.addDefaultTile(4, 4)
+	// b.addDefaultTile(5, 4)
+	// b.addDefaultTile(0, 5)
+	// b.addDefaultTile(1, 5)
+	// b.addDefaultTile(2, 5)
+	// b.addDefaultTile(3, 5)
+	// b.addDefaultTile(4, 5)
+	// b.addDefaultTile(0, 6)
+	// b.addDefaultTile(1, 6)
+	// b.addDefaultTile(2, 6)
+	// b.addDefaultTile(3, 6)
 
 	return b
 }
 
-func (b Battlefield) addDefaultTile(q int32, r int32) {
+func (b Battlefield) addDefaultTile(q int, r int) {
 	tile := Tile{Coordinate: Coordinate{Q: q, R: r}, Cost: 1}
 	b[Coordinate{Q: q, R: r}] = &tile
 }
 
-func (b Battlefield) addBlockingTile(q int32, r int32) {
+func (b Battlefield) addBlockingTile(q int, r int) {
 	tile := Tile{Coordinate: Coordinate{Q: q, R: r}, Cost: 999}
 	b[Coordinate{Q: q, R: r}] = &tile
+}
+
+func (b Battlefield) WriteGridCode() {
+	var filename string = "gridcode.txt"
+	// Create the file if doesn't exist
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	for k, v := range b {
+		cube := axialToCube(k)
+		msg := fmt.Sprintf("<Hexagon q={%v} r={%v} s={%v} ", cube.X, cube.Z, cube.Y)
+		if v.Cost == 999 {
+			msg = fmt.Sprint(msg, "fill=\"pat-block\" ")
+		}
+		msg = fmt.Sprintf("%v><Text>%v, %v, %v</Text></Hexagon>\n", msg, cube.X, cube.Z, cube.Y)
+		f.WriteString(msg)
+	}
 }
